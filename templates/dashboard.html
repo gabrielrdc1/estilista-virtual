@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Dashboard Supervisor</h2>
+  <div class="row">
+    <div class="col-md-6">
+      <canvas id="grafico-classes" height="200"></canvas>
+    </div>
+    <div class="col-md-6">
+      <canvas id="grafico-cores" height="200"></canvas>
+    </div>
+  </div>
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <canvas id="grafico-status" height="200"></canvas>
+    </div>
+    <div class="col-md-6">
+      <canvas id="grafico-fallback" height="200"></canvas>
+    </div>
+  </div>
+  <div class="row mt-4">
+    <div class="col-12">
+      <h4>Últimas Análises</h4>
+      <table class="table table-sm table-bordered">
+        <thead>
+          <tr>
+            <th>Data/Hora</th>
+            <th>Usuário</th>
+            <th>Peças</th>
+            <th>Cores</th>
+            <th>Status</th>
+            <th>Fallback</th>
+            <th>Resultado</th>
+          </tr>
+        </thead>
+        <tbody id="tabela-analises">
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+async function carregarDashboard() {
+  const resp = await fetch('/dashboard_data');
+  const data = await resp.json();
+  // Gráficos
+  new Chart(document.getElementById('grafico-classes'), {
+    type: 'bar',
+    data: data.classes,
+    options: { plugins: { title: { display: true, text: 'Distribuição de Classes' } } }
+  });
+  new Chart(document.getElementById('grafico-cores'), {
+    type: 'pie',
+    data: data.cores,
+    options: { plugins: { title: { display: true, text: 'Distribuição de Cores' } } }
+  });
+  new Chart(document.getElementById('grafico-status'), {
+    type: 'doughnut',
+    data: data.status,
+    options: { plugins: { title: { display: true, text: 'Status das Análises' } } }
+  });
+  new Chart(document.getElementById('grafico-fallback'), {
+    type: 'pie',
+    data: data.fallback,
+    options: { plugins: { title: { display: true, text: 'Uso de Fallback' } } }
+  });
+  // Tabela
+  const tbody = document.getElementById('tabela-analises');
+  tbody.innerHTML = '';
+  data.ultimas.forEach(item => {
+    tbody.innerHTML += `<tr>
+      <td>${item.timestamp}</td>
+      <td>${item.user_id}</td>
+      <td>${item.pecas}</td>
+      <td>${item.cores}</td>
+      <td>${item.status}</td>
+      <td>${item.fallback_used ? 'Sim' : 'Não'}</td>
+      <td>${item.resultado}</td>
+    </tr>`;
+  });
+}
+document.addEventListener('DOMContentLoaded', carregarDashboard);
+</script>
+{% endblock %}

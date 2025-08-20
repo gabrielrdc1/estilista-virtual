@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Estilista Virtual</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(120deg, #f8fafc 60%, #b6d0f7 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-container {
+            max-width: 410px;
+            margin: 48px auto;
+            background: linear-gradient(120deg, #fff 80%, #b6d0f7 100%);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,123,255,0.10), 0 1.5px 8px rgba(0,0,0,0.07);
+            padding: 38px 32px 28px 32px;
+            border: 1.5px solid #b6d0f7;
+        }
+        .brand {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: bold;
+            color: #23272b;
+            letter-spacing: 1.5px;
+            font-size: 2.1rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 8px #b6d0f7;
+        }
+        .login-container h2 .bi {
+            color: #1976d2;
+            margin-right: 0.5rem;
+        }
+        .btn-fashion {
+            background: linear-gradient(90deg,#1976d2 60%,#64b5f6 100%);
+            color: #fff;
+            border: none;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 8px #1976d222;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        .btn-fashion:hover {
+            background: linear-gradient(90deg,#64b5f6 60%,#1976d2 100%);
+            color: #fff;
+            box-shadow: 0 4px 16px #1976d233;
+        }
+        .input-group-text {
+            background: #f8fafc;
+            border: none;
+            color: #1976d2;
+            font-size: 1.2rem;
+        }
+        .form-label.fw-bold {
+            font-size: 1.08rem;
+            color: #23272b;
+            letter-spacing: 0.5px;
+        }
+        .form-control {
+            border-radius: 10px;
+            border: 1.5px solid #ced4da;
+            font-size: 1.05rem;
+            background: #f8fafc;
+            transition: border 0.2s, box-shadow 0.2s;
+        }
+        .form-control:focus {
+            box-shadow: 0 0 0 2px #1976d233;
+            border-color: #64b5f6;
+        }
+        .input-icon {
+            color: #1976d2;
+            font-size: 1.2rem;
+        }
+        .position-relative .bi-eye-slash, .position-relative .bi-eye {
+            font-size: 1.2rem;
+            color: #1976d2;
+        }
+        .footer {
+            text-align: center;
+            font-size: 0.95rem;
+            color: #888;
+            margin-top: 2rem;
+        }
+        .alert-warning {
+            border-radius: 10px;
+            font-size: 1rem;
+            background: #e3f0ff;
+            border: 1.5px solid #64b5f6;
+            color: #1976d2;
+        }
+        .login-container form .input-group {
+            box-shadow: 0 1.5px 8px #b6d0f7;
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+        }
+        .login-container form .input-group:focus-within {
+            box-shadow: 0 0 0 2px #64b5f644;
+        }
+        .login-container a.fw-bold {
+            color: #1976d2;
+            transition: color 0.2s;
+        }
+        .login-container a.fw-bold:hover {
+            color: #23272b;
+            text-decoration: underline;
+        }
+        .btn-outline-danger {
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            background: #fff;
+            color: #dc3545;
+            border: 1.5px solid #dc3545;
+            transition: background 0.2s, color 0.2s;
+        }
+        .btn-outline-danger:hover {
+            background: #dc3545;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container shadow-lg p-4 rounded-4" style="background:#fff;">
+        <h2 class="brand text-center mb-4"><i class="bi bi-person-circle"></i>Estilista Virtual</h2>
+        <form method="post">
+            <div class="mb-3">
+                <label for="email" class="form-label fw-bold">E-mail</label>
+                <div class="input-group">
+                    <span class="input-group-text input-icon"><i class="bi bi-envelope"></i></span>
+                    <input type="email" name="email" id="email" class="form-control" placeholder="Digite seu e-mail" required>
+                </div>
+            </div>
+            <div class="mb-3 position-relative">
+                <label for="senha" class="form-label fw-bold">Senha</label>
+                <div class="input-group">
+                    <span class="input-group-text input-icon"><i class="bi bi-lock"></i></span>
+                    <input type="password" name="senha" id="senha" class="form-control" placeholder="Digite sua senha" required>
+                    <span class="input-group-text" style="cursor:pointer;" onclick="togglePassword('senha', this)"><i class="bi bi-eye-slash"></i></span>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-fashion w-100 mb-2"><i class="bi bi-box-arrow-in-right me-2"></i>Entrar</button>
+        </form>
+        <div class="d-grid gap-2 mb-2">
+            <a href="{{ url_for('auth.login_google') }}" class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="22" height="22" class="me-2">
+                Entrar com Google
+            </a>
+        </div>
+        <div class="text-center mt-3">
+            <a href="{{ url_for('auth.register') }}" class="fw-bold"><i class="bi bi-arrow-right me-1"></i>Criar conta</a>
+        </div>
+        <div class="footer">
+            &copy; 2025 Estilista Virtual.
+        </div>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div class="alert alert-warning mt-3">
+            {% for message in messages %}
+              <div>{{ message }}</div>
+            {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+    </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+<script>
+function togglePassword(inputId, iconSpan) {
+    const input = document.getElementById(inputId);
+    const icon = iconSpan.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+    }
+}
+</script>
+</body>
+</html>

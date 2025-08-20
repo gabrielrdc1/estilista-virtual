@@ -1,0 +1,738 @@
+{#
+IMPORTANTE: Para permitir acesso público a esta página, NÃO use @login_required na rota principal do Flask.
+Garanta que a variável usuario_logado (bool) seja passada para o template, ex:
+
+    return render_template('index.html', usuario_logado=current_user.is_authenticated, historico=pega_historico() if current_user.is_authenticated else [])
+#}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ModAI 👗</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        /* Estilos do novo layout */
+        body {
+            overflow-x: hidden;
+            display: flex;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        }
+        .sidebar {
+            flex-shrink: 0;
+            width: 320px;
+            background: linear-gradient(135deg, #23272b 60%, #007bff 100%);
+            color: #f8f9fa;
+            border-right: none;
+            box-shadow: 2px 0 16px rgba(0,0,0,0.08);
+            padding: 2rem 1.5rem 1.5rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            border-radius: 0 24px 24px 0;
+        }
+        .sidebar .logo {
+            font-size: 2.2rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #fff;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+        .sidebar hr {
+            border-top: 2px solid #007bff;
+            margin: 1.5rem 0;
+        }
+        .sidebar {
+            flex-shrink: 0;
+            width: 320px;
+            background: linear-gradient(135deg, #23272b 60%, #007bff 100%);
+            color: #f8f9fa;
+            border-right: none;
+            box-shadow: 2px 0 16px rgba(0,0,0,0.08);
+            padding: 2rem 1.5rem 1.5rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            border-radius: 0 24px 24px 0;
+        }
+            background-color: #007bff !important;
+            color: #fff !important;
+        }
+        .sidebar .active {
+            background-color: #495057 !important;
+            color: #fff !important;
+            font-weight: 500;
+        }
+        .sidebar .btn-nova-analise {
+            background: linear-gradient(90deg, #007bff 60%, #0056b3 100%);
+            color: #fff;
+            font-weight: 600;
+            border-radius: 12px;
+            padding: 0.9rem;
+            transition: background 0.2s;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+            font-size: 1.1rem;
+            margin-top: 2rem;
+        }
+        .sidebar .btn-nova-analise:hover {
+            background: linear-gradient(90deg, #0056b3 60%, #007bff 100%);
+        }
+        .sidebar .fw-bold {
+            color: #fff !important;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        .sidebar .history-item {
+            background-color: rgba(255,255,255,0.04);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            padding: 0.7rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            transition: all 0.2s;
+        }
+        .sidebar .history-item:hover {
+            background-color: #007bff22;
+            transform: translateY(-2px);
+        }
+        .sidebar .history-item a {
+            font-weight: 500;
+            color: #fff !important;
+            font-size: 1rem;
+        }
+        /* Corrige cor do texto do dropdown de histórico */
+        .dropdown-menu {
+            background: #23272b;
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+        .dropdown-menu .dropdown-item {
+            color: #f8f9fa !important;
+            background: transparent;
+            font-weight: 500;
+            transition: background 0.2s, color 0.2s;
+        }
+        .dropdown-menu .dropdown-item:hover {
+            background: #007bff;
+            color: #fff !important;
+        }
+        .dropdown-menu .dropdown-item.text-danger {
+            color: #dc3545 !important;
+        }
+        .dropdown-menu .dropdown-item.text-danger:hover {
+            background: #dc3545;
+            color: #fff !important;
+        }
+        .sidebar .history-item .dropdown {
+            margin-left: 0.5rem;
+        }
+        .main-content-area {
+            flex-grow: 1;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            height: 100vh;
+            overflow-y: auto;
+            align-items: center;
+        }
+        .resultado-section,
+        .upload-form-section {
+            width: 100%;
+            max-width: 900px;
+            background: linear-gradient(120deg, #f8fafc 70%, #e3f0ff 100%);
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(0,123,255,0.08), 0 1.5px 8px rgba(0,0,0,0.07);
+            padding: 2.5rem 2.5rem 2rem 2.5rem;
+            border: 1.5px solid #e3eaf5;
+        }
+        .resultado-section h4, .upload-form-section h4 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #23272b;
+            margin-bottom: 1.5rem;
+            letter-spacing: 1px;
+        }
+        .resultado-section {
+            border-left: 6px solid #007bff;
+            margin-bottom: 1.5rem;
+        }
+        .upload-form-section {
+            border-left: 6px solid #23272b;
+        }
+        .btn.btn-dark, .btn.btn-primary {
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 8px rgba(0,123,255,0.08);
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        .btn.btn-dark:hover, .btn.btn-primary:hover {
+            background: #0056b3 !important;
+            color: #fff !important;
+            box-shadow: 0 4px 16px rgba(0,123,255,0.13);
+        }
+        .form-label.fw-bold {
+            font-size: 1.08rem;
+            color: #23272b;
+            letter-spacing: 0.5px;
+        }
+        .form-select, .form-control {
+            border-radius: 8px;
+            border: 1.5px solid #ced4da;
+            font-size: 1.05rem;
+            background: #f8fafc;
+            transition: border 0.2s;
+        }
+        .form-select:focus, .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px #007bff22;
+        }
+        .upload-area {
+            background: #f8fafc;
+            border: 2px dashed #007bff;
+            color: #007bff;
+            font-weight: 500;
+            border-radius: 10px;
+            transition: background 0.2s, border 0.2s;
+        }
+        .upload-area:hover {
+            background: #e3f0ff;
+            border-color: #0056b3;
+        }
+        .preview-thumbnails img {
+            border: 2px solid #007bff;
+            box-shadow: 0 2px 8px rgba(0,123,255,0.08);
+        }
+        /* Moderniza avaliação */
+        .resultado-text {
+            background: #e3f0ff;
+            border-radius: 10px;
+            padding: 1.2rem 1.5rem;
+            font-size: 1.15rem;
+            color: #23272b;
+            box-shadow: 0 2px 8px rgba(0,123,255,0.07);
+        }
+        .resultado-text strong {
+            color: #007bff;
+        }
+        /* Moderniza imagens do resultado */
+        .resultado-card-content img {
+            border: 2.5px solid #007bff;
+            box-shadow: 0 4px 16px rgba(0,123,255,0.10);
+        }
+        .resultado-card-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+        .resultado-card-content img {
+            max-height: 250px;
+            width: auto;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        .resultado-text {
+            flex-grow: 1;
+        }
+        .upload-area {
+            border: 2px dashed #ced4da;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .upload-area:hover {
+            background-color: #f8f9fa;
+        }
+        .preview-thumbnails {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 1rem;
+        }
+        .preview-thumbnails img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+        
+        /* Dark mode overrides (from original code, adjusted for new layout) */
+        .dark-mode {
+            background-color: #181a1b !important;
+            color: #f8f9fa !important;
+        }
+        .dark-mode .sidebar {
+            background-color: #23272b !important;
+            border-color: #343a40 !important;
+        }
+        .dark-mode .main-content-area {
+            background-color: #181a1b !important;
+            color: #f8f9fa !important;
+        }
+        .dark-mode .resultado-section,
+        .dark-mode .upload-form-section {
+            background-color: #2b2f33;
+            border-color: #343a40;
+            color: #f8f9fa;
+        }
+        .dark-mode .form-label,
+        .dark-mode .form-check-label,
+        .dark-mode .resultado-section h4,
+        .dark-mode .resultado-section p,
+        .dark-mode .resultado-section strong {
+            color: #f8f9fa !important;
+        }
+        .dark-mode .form-select,
+        .dark-mode .form-control {
+            background-color: #23272b !important;
+            color: #f8f9fa !important;
+            border: 1px solid #343a40 !important;
+        }
+        .dark-mode .history-item {
+            background-color: #343a40 !important;
+            color: #f8f9fa !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .dark-mode .history-item:hover {
+            background-color: #495057 !important;
+        }
+        .dark-mode .history-item a {
+            color: #f8f9fa !important;
+        }
+    </style>
+</head>
+<body>
+    {% if usuario_logado %}
+    <div class="sidebar">
+        <div>
+            <div class="logo">ModAI</div>
+            <hr class="text-white-50">
+            <nav class="nav flex-column">
+                <p class="fw-bold text-white-50 mt-3">Menus</p>
+                <div class="dropdown mb-2">
+                    <button class="btn btn-dark w-100 d-flex align-items-center justify-content-between dropdown-toggle" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle me-2"></i> Conta
+                    </button>
+                    <ul class="dropdown-menu w-100" aria-labelledby="userMenuButton">
+                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#perfilModal"><i class="bi bi-person-lines-fill me-2"></i>Perfil</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/auth/logout"><i class="bi bi-box-arrow-right me-2"></i>Sair</a></li>
+                    </ul>
+                </div>
+                <p class="fw-bold text-white-50 mt-3">📂 Atividades Recentes</p>
+                <div id="historyList">
+                    {% for item in historico %}
+                    <div class="history-item d-flex align-items-center justify-content-between" data-id="{{ item.id }}">
+                        <a href="/historico/{{ item.id }}" class="text-decoration-none flex-grow-1" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            {{ item.nome if item.nome else ("Análise " ~ item.id ~ " - " ~ item.data) }}
+                        </a>
+                        <div class="dropdown ms-2">
+                            <button class="btn btn-link btn-sm p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item" href="#" onclick="renomearHistorico(this)" data-id="{{ item.id }}" data-nome="{{ item.nome|default('') }}">Renomear</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="#" onclick="deletarHistorico(this)" data-id="{{ item.id }}">Deletar</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </nav>
+        </div>
+        <a href="/" class="btn btn-nova-analise mt-3 w-100"><i class="bi bi-plus-circle me-2"></i>Nova Análise</a>
+    </div>
+    {% else %}
+    <nav class="navbar navbar-light bg-transparent justify-content-end px-4 py-3 w-100" style="position: absolute; top: 0; right: 0; z-index: 10;">
+        <a href="/auth/login" class="btn btn-dark px-4 py-2"><i class="bi bi-box-arrow-in-right me-2"></i>Entrar</a>
+    </nav>
+    {% endif %}
+
+    <div class="main-content-area">
+        <div class="resultado-section" id="resultadoSection" style="display: none;">
+            <h4>Resultado:</h4>
+            <div class="resultado-card-content">
+                <div class="d-flex flex-wrap" id="resultadoImagesContainer"></div>
+                <div class="resultado-text">
+                    <p><strong>Avaliação:</strong> <span id="resultadoAvaliacao"></span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="upload-form-section">
+            <h4 class="mb-4">Nova Análise</h4>
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="mb-4">
+                    <label for="imagens" class="form-label fw-bold">Anexar Imagens</label>
+                    <div class="d-flex align-items-center mb-2 gap-2">
+                        <div id="dragDropArea" class="upload-area flex-grow-1">
+                            <i class="bi bi-cloud-arrow-up fs-2"></i>
+                            <p class="mb-0">Arraste e solte ou clique para selecionar</p>
+                        </div>
+                        <button type="button" class="btn btn-outline-secondary" id="abrirCameraBtn" title="Tirar foto com a câmera">
+                            <i class="bi bi-camera"></i>
+                        </button>
+                    </div>
+                    <input class="form-control d-none" type="file" id="imagens" name="imagens" multiple accept="image/*" capture="environment" required>
+                    <div id="previewContainer" class="preview-thumbnails"></div>
+                    <div id="cameraModal" class="modal" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Tirar Foto</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar" onclick="fecharCamera()"></button>
+                                </div>
+                                <div class="modal-body text-center">
+                                    <video id="cameraVideo" autoplay playsinline style="max-width:100%;border-radius:8px;"></video>
+                                    <canvas id="cameraCanvas" style="display:none;"></canvas>
+                                </div>
+                                <div class="modal-footer justify-content-center">
+                                    <button type="button" class="btn btn-primary" id="tirarFotoBtn">Capturar</button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="fecharCamera()">Cancelar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label for="sexo" class="form-label fw-bold">Sexo</label>
+                        <select class="form-select" id="sexo" name="sexo" required>
+                            <option value="" disabled selected>Escolha...</option>
+                            <option value="masculino">Masculino</option>
+                            <option value="feminino">Feminino</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="ocasiao" class="form-label fw-bold">Ocasião</label>
+                        <select class="form-select" id="ocasiao" name="ocasiao" required>
+                            <option value="" disabled selected>Escolha...</option>
+                            <option value="casual">Casual</option>
+                            <option value="trabalho">Trabalho</option>
+                            <option value="festa">Festa</option>
+                            <option value="academia">Academia</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-dark w-100 py-2" id="analyzeButton">Analisar</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal fade" id="perfilModal" tabindex="-1" aria-labelledby="perfilModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="perfilModalLabel">Meu Perfil</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <h5 class="mb-3">Olá, {{ usuario_nome }}!</h5>
+                    <p class="text-muted">Bem-vindo(a) ao ModAI. Aqui você pode analisar seus looks e receber sugestões personalizadas. Aproveite sua experiência!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="renameModal" tabindex="-1" aria-labelledby="renameModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="renameModalLabel">Renomear Análise</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" class="form-control" id="newHistoryNameInput" placeholder="Novo nome para a análise">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="saveNewHistoryName">Renomear</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteConfirmModalLabel">Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Tem certeza que deseja deletar esta análise?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteHistory">Deletar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // Definição de variável resultadoFromServer via Jinja2
+    {% if resultado %}
+        const resultadoFromServer = {{ resultado | tojson | safe }};
+    {% else %}
+        const resultadoFromServer = null;
+    {% endif %}
+
+    const uploadForm = document.getElementById('uploadForm');
+    const analyzeButton = document.getElementById('analyzeButton');
+    const resultadoSection = document.getElementById('resultadoSection');
+    const resultadoImagesContainer = document.getElementById('resultadoImagesContainer');
+    const resultadoAvaliacao = document.getElementById('resultadoAvaliacao');
+    const historyList = document.getElementById('historyList');
+    const renameModal = new bootstrap.Modal(document.getElementById('renameModal'));
+    const deleteConfirmModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+    let currentHistoryIdToRename, currentHistoryIdToDelete;
+
+    function displayResult(resultado) {
+        resultadoImagesContainer.innerHTML = '';
+        if (resultado.imagens && resultado.imagens.length > 0) {
+            resultado.imagens.forEach(function(imgPath) {
+                const img = document.createElement('img');
+                let cleanPath = imgPath.replace(/^uploads\//, '');
+                img.src = '/static/uploads/' + cleanPath;
+                img.className = 'image-preview me-2 mb-2';
+                img.style.maxHeight = '250px';
+                img.style.maxWidth = '250px';
+                img.style.objectFit = 'contain';
+                img.style.borderRadius = '8px';
+                img.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+                resultadoImagesContainer.appendChild(img);
+            });
+        }
+        resultadoAvaliacao.textContent = resultado.avaliacao || 'N/A';
+        resultadoSection.style.display = 'block';
+    }
+
+    function resetUI() {
+        resultadoSection.style.display = 'none';
+        resultadoImagesContainer.innerHTML = '';
+        resultadoAvaliacao.textContent = '';
+    }
+
+    function renomearHistorico(el) {
+        currentHistoryIdToRename = el.dataset.id;
+        document.getElementById('newHistoryNameInput').value = el.dataset.nome;
+        renameModal.show();
+    }
+    function deletarHistorico(el) {
+        currentHistoryIdToDelete = el.dataset.id;
+        deleteConfirmModal.show();
+    }
+    document.getElementById('saveNewHistoryName').addEventListener('click', () => {
+        const name = document.getElementById('newHistoryNameInput').value.trim();
+        if (name) fetch(`/historico/renomear/${currentHistoryIdToRename}`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({nome:name})}).then(()=>location.reload());
+    });
+    document.getElementById('confirmDeleteHistory').addEventListener('click', () => {
+        fetch(`/historico/deletar/${currentHistoryIdToDelete}`, {method:'POST'}).then(()=>location.reload());
+    });
+
+uploadForm.addEventListener('submit', async e => {
+    {% if not usuario_logado %}
+    // Controle: só permite uma análise sem login
+    if (localStorage.getItem('analise_realizada')) {
+        alert('Para realizar mais de uma análise, faça login ou crie uma conta.');
+        return;
+    }
+    {% endif %}
+    e.preventDefault();
+    resetUI();
+    analyzeButton.disabled = true;
+    analyzeButton.textContent = 'Analisando...';
+    try {
+        const res = await fetch('/analisar_ajax', {method:'POST', body:new FormData(uploadForm)});
+        const data = await res.json();
+        if (data.success) {
+            displayResult(data.resultado);
+            {% if not usuario_logado %}
+            localStorage.setItem('analise_realizada', '1');
+            {% endif %}
+            if (data.novo_historico_item) {
+                const item = data.novo_historico_item;
+                const newHistoryItemHTML = `
+                    <div class="history-item" data-id="${item.id}">
+                        <a href="/historico/${item.id}" class="text-decoration-none flex-grow-1" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            ${item.nome||`Análise ${item.id} - ${item.data}`}
+                        </a>
+                        <div class="dropdown">
+                            <button class="btn btn-link btn-sm p-0 ms-2" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" data-id="${item.id}" data-nome="${item.nome}" onclick="renomearHistorico(this)">Renomear</a></li>
+                                <li><a class="dropdown-item text-danger" href="#" data-id="${item.id}" onclick="deletarHistorico(this)">Deletar</a></li>
+                            </ul>
+                        </div>
+                    </div>`;
+                if (historyList) historyList.insertAdjacentHTML('afterbegin', newHistoryItemHTML);
+            }
+            uploadForm.reset();
+            document.getElementById('previewContainer').innerHTML = '';
+        } else {
+            alert(data.message || 'Erro desconhecido na análise');
+        }
+    } catch (error) {
+        console.error('Erro:', error);
+        alert('Erro de conectividade. Verifique sua conexão e tente novamente.');
+    } finally {
+        analyzeButton.disabled = false;
+        analyzeButton.textContent = 'Analisar';
+    }
+});
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = localStorage.getItem('tema');
+        const isDark = savedTheme === 'dark';
+        if (isDark) {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
+        }
+        if (typeof resultadoFromServer !== 'undefined' && resultadoFromServer) {
+            displayResult(resultadoFromServer);
+        }
+    });
+
+    const dragDropArea = document.getElementById('dragDropArea');
+    dragDropArea.addEventListener('click', () => imagensInput.click());
+    dragDropArea.addEventListener('dragover', e => {
+        e.preventDefault();
+        dragDropArea.classList.add('dragover');
+    });
+    dragDropArea.addEventListener('dragleave', e => {
+        dragDropArea.classList.remove('dragover');
+    });
+    dragDropArea.addEventListener('drop', e => {
+        e.preventDefault();
+        dragDropArea.classList.remove('dragover');
+        imagensInput.files = e.dataTransfer.files;
+        const event = new Event('change');
+        imagensInput.dispatchEvent(event);
+    });
+
+// Preview e remoção de imagens antes do envio
+const imagensInput = document.getElementById('imagens');
+const previewContainer = document.getElementById('previewContainer');
+let imagensSelecionadas = [];
+
+imagensInput.addEventListener('change', function(e) {
+    imagensSelecionadas = Array.from(imagensInput.files);
+    atualizarPreview();
+});
+
+function atualizarPreview() {
+    previewContainer.innerHTML = '';
+    imagensSelecionadas.forEach((file, idx) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const div = document.createElement('div');
+            div.className = 'preview-thumb position-relative d-inline-block m-1';
+            div.style.display = 'inline-block';
+            div.style.position = 'relative';
+            div.innerHTML = `
+                <img src="${e.target.result}" class="image-preview" style="max-width:100px;max-height:100px;border-radius:8px;object-fit:cover;box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+                <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0" style="border-radius:50%;padding:2px 6px;z-index:2;" onclick="removerImagem(${idx})">&times;</button>
+            `;
+            previewContainer.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+window.removerImagem = function(idx) {
+    imagensSelecionadas.splice(idx, 1);
+    // Atualiza o input de arquivos
+    const dataTransfer = new DataTransfer();
+    imagensSelecionadas.forEach(f => dataTransfer.items.add(f));
+    imagensInput.files = dataTransfer.files;
+    atualizarPreview();
+};
+
+    // Câmera: abrir modal, capturar e adicionar ao preview
+    const abrirCameraBtn = document.getElementById('abrirCameraBtn');
+    const cameraModal = document.getElementById('cameraModal');
+    const cameraVideo = document.getElementById('cameraVideo');
+    const cameraCanvas = document.getElementById('cameraCanvas');
+    const tirarFotoBtn = document.getElementById('tirarFotoBtn');
+    let cameraStream = null;
+    let cameraModalInstance = null;
+
+    abrirCameraBtn.addEventListener('click', async () => {
+        if (window.bootstrap) {
+            cameraModalInstance = new bootstrap.Modal(cameraModal);
+            cameraModalInstance.show();
+        } else {
+            cameraModal.style.display = 'block';
+        }
+        try {
+            cameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
+            cameraVideo.srcObject = cameraStream;
+            cameraVideo.play();
+        } catch (err) {
+            alert('Não foi possível acessar a câmera.');
+        }
+    });
+
+    window.fecharCamera = function() {
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+            cameraStream = null;
+        }
+        cameraVideo.srcObject = null;
+        if (window.bootstrap && cameraModalInstance) {
+            cameraModalInstance.hide();
+        } else {
+            cameraModal.style.display = 'none';
+        }
+    };
+
+    tirarFotoBtn.addEventListener('click', () => {
+        cameraCanvas.width = cameraVideo.videoWidth;
+        cameraCanvas.height = cameraVideo.videoHeight;
+        cameraCanvas.getContext('2d').drawImage(cameraVideo, 0, 0);
+        cameraCanvas.toBlob(blob => {
+            const file = new File([blob], `foto_${Date.now()}.jpg`, { type: 'image/jpeg' });
+            imagensSelecionadas.push(file);
+            const dataTransfer = new DataTransfer();
+            imagensSelecionadas.forEach(f => dataTransfer.items.add(f));
+            imagensInput.files = dataTransfer.files;
+            atualizarPreview();
+            fecharCamera();
+        }, 'image/jpeg', 0.95);
+    });
+
+// Garante que ao fechar o modal por qualquer meio, a câmera é liberada
+cameraModal.addEventListener('hidden.bs.modal', fecharCamera);
+    </script>
+</body>
+</html>

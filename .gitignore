@@ -205,3 +205,13 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Ignorar imagens e pastas de imagens do projeto
+static/temp_crops/
+static/uploads/
+data/train/
+data/val/
+*.jpg
+*.jpeg
+*.png
+*.gif
