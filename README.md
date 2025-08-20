@@ -59,6 +59,3 @@ A função de extração de cor dominante está em [`app.py`](app.py), utilizand
 
 Desenvolvido por Gabriel Cristo.
 
----
-
-> **Observação:** Este projeto é para fins acadêmicos/demonstração. Para uso em produção, recomenda-se revisar questões de segurança, performance e escalabilidade.
